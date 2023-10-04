@@ -1,0 +1,10 @@
+package norm-comp-dist
+authors = "Denis Buzdalov"
+license = "Apache-2.0"
+brief = "Facilities for computing the normalised compression distance"
+
+sourcedir = "src"
+
+version = 0.1.0
+
+-- modules =
