@@ -1,6 +1,4 @@
-module Runner
-
-import BaseDir
+module Tests
 
 import Test.Golden.RunnerHelper
 

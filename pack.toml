@@ -1,6 +1,3 @@
-[install]
-whitelist = [ "norm-comp-dist-tests" ]
-
 [custom.all.norm-comp-dist]
 type = "local"
 path = "."

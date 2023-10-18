@@ -1,4 +1,4 @@
 build/
+.build/
 **/tests/**/failures
 **/tests/**/output
-**/tests/.pack_lock
