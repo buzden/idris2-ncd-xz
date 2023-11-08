@@ -1,5 +1,5 @@
-[custom.all.norm-comp-dist]
+[custom.all.ncd-xz]
 type = "local"
 path = "."
-ipkg = "norm-comp-dist.ipkg"
+ipkg = "ncd-xz.ipkg"
 test = "tests/tests.ipkg"

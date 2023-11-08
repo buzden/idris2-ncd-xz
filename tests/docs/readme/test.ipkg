@@ -2,4 +2,4 @@ package test
 
 authors = "Denis Buzdalov"
 
-depends = norm-comp-dist
+depends = ncd-xz

@@ -1,4 +1,4 @@
-package norm-comp-dist-tests
+package ncd-xz-tests
 version = 0.1.0
 authors = "Denis Buzdalov"
 
