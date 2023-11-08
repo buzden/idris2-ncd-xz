@@ -29,10 +29,12 @@ A="$(cat "$FILE_A" | compSize)"
 B="$(cat "$FILE_B" | compSize)"
 AB="$(cat "$FILE_A" "$FILE_B" | compSize)"
 BA="$(cat "$FILE_B" "$FILE_A" | compSize)"
+AA="$(cat "$FILE_A" "$FILE_A" | compSize)"
+BB="$(cat "$FILE_B" "$FILE_B" | compSize)"
 
 echo "
 scale=10
 define min(a, b) { if (a < b) return a else return b }
 define max(a, b) { if (a > b) return a else return b }
-(min($AB, $BA) - min($A, $B)) / max($A, $B)
+(min($AB, $BA) - min($AA, $BB)) / max($A, $B)
 " | bc
