@@ -20,17 +20,17 @@ FILE_B="$2"
 fileExists "$FILE_A"
 fileExists "$FILE_B"
 
-# Prints a count of bytes of a compressed stdin
+# Prints a count of bytes of a compressed files
 compSize() {
-  xz --format=raw --compress --stdout --no-warn --quiet | wc -c
+  cat "$@" | xz --format=raw --compress --stdout --no-warn --quiet | wc -c
 }
 
-A="$(cat "$FILE_A" | compSize)"
-B="$(cat "$FILE_B" | compSize)"
-AB="$(cat "$FILE_A" "$FILE_B" | compSize)"
-BA="$(cat "$FILE_B" "$FILE_A" | compSize)"
-AA="$(cat "$FILE_A" "$FILE_A" | compSize)"
-BB="$(cat "$FILE_B" "$FILE_B" | compSize)"
+A="$(compSize "$FILE_A")"
+B="$(compSize "$FILE_B")"
+AB="$(compSize "$FILE_A" "$FILE_B")"
+BA="$(compSize "$FILE_B" "$FILE_A")"
+AA="$(compSize "$FILE_A" "$FILE_A")"
+BB="$(compSize "$FILE_B" "$FILE_B")"
 
 echo "
 scale=10
