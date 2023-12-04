@@ -6,9 +6,13 @@ brief = "Facilities for computing the normalised compression distance"
 sourcedir = "src"
 builddir = ".build"
 
+depends = bounded-doubles
+        , filepath
+
 -- executable = "ncd-xz"
+-- main =
+
+modules = Information.Distance.NCD
+        , Information.Distance.NCD.XZ
 
 version = 0.1.0
-
--- main =
--- modules =
