@@ -48,8 +48,8 @@ namespace GettingXZ
     | CmdWritesWrong XZCmd String
 
   Interpolation XZCmd where
-    interpolate Xz = "xz --format=raw --compress --stdout --no-warn --quiet"
-    interpolate Wc = "wc -c"
+    interpolate Xz  = "xz --format=raw --compress --stdout --no-warn --quiet"
+    interpolate Wc  = "wc -c"
     interpolate Cat = "cat"
 
   [CmdName] Interpolation XZCmd where
@@ -62,14 +62,14 @@ namespace GettingXZ
     interpolate $ CmdIsNotUsable   cmd = let _ = CmdName in "The `\{cmd}` command is not usable"
     interpolate $ CmdCan'tRead     cmd = let _ = CmdName in "The `\{cmd}` command can't read input"
     interpolate $ Can'tReadFromCmd cmd = let _ = CmdName in "Cannot read output of the `\{cmd}` command"
-    interpolate $ CmdWritesWrong cmd s = let _ = CmdName in "The `\{cmd}` writes unexpected output: \{s}"
+    interpolate $ CmdWritesWrong cmd s = let _ = CmdName in "The `\{cmd}` writes unexpected output: \"\{s}\""
 
   export
   externalXZ : HasIO n => MonadError XZUsabilityError n => n XZ
   externalXZ = assert_total $ do
+    checkUsable Cat "abcd" (== "abcd")
     checkUsable Xz "abcd" $ \s => let l = length s in 4 <= l && l <= 10
     checkUsable Wc "abcd" $ (== 4) . length
-    checkUsable Cat {arg="-"} "abcd" (== "abcd")
     pure CallExternXZ
 
     where
