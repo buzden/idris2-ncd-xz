@@ -14,16 +14,14 @@ import System.File
 
 public export
 data XZFileError
-  = FileNotFound AnyFile
-  | Can'tRead AnyFile
+  = FileIOError AnyFile FileError
   | Couldn'tCompress (List AnyFile)
   | Couldn'tReadBytesCount
   | BadBytesCount String
 
 export
 Interpolation XZFileError where
-  interpolate $ FileNotFound file    = "File not found: `\{file}`"
-  interpolate $ Can'tRead file       = "Cannot read from `\{file}`"
+  interpolate $ FileIOError file err = "Problem with file `\{file}`: \{show err}"
   interpolate $ Couldn'tCompress fs  = "Could not compress files \{fs}" where
     Interpolation a => Interpolation (List a) where
       interpolate = joinBy ", " . map interpolate
@@ -100,7 +98,11 @@ namespace GettingXZ
           fromMaybe (foldMap length ss) $ unsafePerformIO act
 
         xzFileLen fs = do
-          let cmd = "\{Cat} \{joinBy " " $ escapeArg . interpolate <$> fs} | \{Xz} | \{Wc}"
+          let fss = fs <&> \pth => (pth, escapeArg $ interpolate pth)
+          for_ fss $ \(pth, fn) => do
+            Right f <- openFile fn Read | Left e => throwError $ FileIOError pth e
+            closeFile f
+          let cmd = "\{Cat} \{joinBy " " $ snd <$> fss} | \{Xz} | \{Wc}"
           Right f <- popen cmd Read        | _ => throwError $ Couldn'tCompress fs
           Right n <- assert_total fRead f  | _ => throwError $ Couldn'tReadBytesCount
           0 <- pclose f                    | _ => throwError $ Couldn'tCompress fs
