@@ -1,7 +1,6 @@
 package a-test
 
-depends = ncd-xz
-        , hedgehog
+depends = common-definitions-for-tests
 
 main = DistanceSpec
 

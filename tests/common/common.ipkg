@@ -1,0 +1,6 @@
+package common-definitions-for-tests
+builddir = ".build"
+sourcedir = "."
+modules = Test.Common
+depends = hedgehog
+        , ncd-xz
