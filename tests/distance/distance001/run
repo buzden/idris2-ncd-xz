@@ -1,0 +1,6 @@
+rm -rf build/
+
+flock "$1" pack -q install-deps test.ipkg && \
+HEDGEHOG_COLOR=0 pack -q run test.ipkg -n 1000
+
+rm -rf build/

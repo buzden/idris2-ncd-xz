@@ -1,6 +1,7 @@
 module Information.Distance.NCD.XZ
 
 import public Control.Monad.Error.Interface
+import Control.Monad.Error.Either
 
 import Data.FilePath.File
 
@@ -65,8 +66,8 @@ namespace GettingXZ
     interpolate $ CmdWritesWrong cmd s = let _ = CmdName in "The `\{cmd}` writes unexpected output: \"\{s}\""
 
   export
-  externalXZ : HasIO n => MonadError XZUsabilityError n => n XZ
-  externalXZ = assert_total $ do
+  externalXZ' : HasIO n => MonadError XZUsabilityError n => n XZ
+  externalXZ' = assert_total $ do
     checkUsable Cat "abcd" (== "abcd")
     checkUsable Xz {arg="--version"} "abcd" $ (> 0) . length
     checkUsable Wc "abcd" $ (== "4") . trim
@@ -108,6 +109,10 @@ namespace GettingXZ
           0 <- pclose f                    | _ => throwError $ Couldn'tCompress fs
           let Just n = parsePositive n     | _ => throwError $ BadBytesCount n
           pure n
+
+  export
+  externalXZ : HasIO n => n $ Either XZUsabilityError XZ
+  externalXZ = runEitherT {e=XZUsabilityError} {m=n} externalXZ'
 
 --- Implementations of NCD using `xz` ---
 
