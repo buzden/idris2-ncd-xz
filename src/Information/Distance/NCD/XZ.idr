@@ -68,8 +68,8 @@ namespace GettingXZ
   externalXZ : HasIO n => MonadError XZUsabilityError n => n XZ
   externalXZ = assert_total $ do
     checkUsable Cat "abcd" (== "abcd")
-    checkUsable Xz "abcd" $ \s => let l = length s in 4 <= l && l <= 10
-    checkUsable Wc "abcd" $ (== 4) . length
+    checkUsable Xz {arg="--version"} "abcd" $ (> 0) . length
+    checkUsable Wc "abcd" $ (== "4") . trim
     pure CallExternXZ
 
     where
