@@ -131,6 +131,10 @@ XZ => NCD Prelude.id String where
     ncdValue a b ab ba aa bb
 
 export
+StringNCD : XZ => NCD Prelude.id String
+StringNCD = %search
+
+export
 XZ => HasIO m => MonadError XZFileError m => NCD m AnyFile where
   ncd sA sB = do
     let a  = xzFileLen [sA]
@@ -140,3 +144,7 @@ XZ => HasIO m => MonadError XZFileError m => NCD m AnyFile where
     let aa = xzFileLen [sA, sA]
     let bb = xzFileLen [sB, sB]
     [| ncdValue a b ab ba aa bb |]
+
+export
+FileNCD : XZ => HasIO m => MonadError XZFileError m => NCD m AnyFile
+FileNCD = %search
