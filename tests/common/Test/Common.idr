@@ -58,14 +58,21 @@ mapCh s = do
   pure $ pack $ apply f <$> unpack s
 
 export
+bytesStrings : {n : Nat} -> Gen $ Vect (S n) String
+bytesStrings = do
+  let changesList = frequency
+                      [ (1 , Left <$> bytesString)
+                      , (10, map Right $ list (linear 0 25) $ element [cut, perm, mapCh])
+                      ]
+  (base, changes, idx) <- [| (,,) bytesString (vect n changesList) (fin $ constant 0 last) |]
+  changed <- for changes $ either pure $ foldlM (flip apply) base
+  pure $ insertAt idx base changed
+
+export
 bytesString2 : Gen (String, String)
-bytesString2 = frequency
-  [ (the Nat 1,) [| (bytesString, bytesString) |]
-  , (the Nat 10,) $ do
-      (s, changes) <- [| (bytesString, list (linear 0 25) $ element [cut, perm, mapCh]) |]
-      s' <- foldlM (flip apply) s changes
-      element [(s, s'), (s', s)]
-  ]
+bytesString2 = do
+  [a, b] <- bytesStrings
+  pure (a, b)
 
 export
 testProperty' : (name : String) -> (XZ => Property) -> IO ()
