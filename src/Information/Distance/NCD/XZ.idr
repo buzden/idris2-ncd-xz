@@ -47,6 +47,7 @@ namespace GettingXZ
     | CmdCan'tRead XZCmd
     | Can'tReadFromCmd XZCmd
     | CmdWritesWrong XZCmd String
+    | CmdExitsWrong XZCmd Int
 
   Interpolation XZCmd where
     interpolate Xz  = "xz --format=raw --compress --stdout --no-warn --quiet"
@@ -64,6 +65,7 @@ namespace GettingXZ
     interpolate $ CmdCan'tRead     cmd = let _ = CmdName in "The `\{cmd}` command can't read input"
     interpolate $ Can'tReadFromCmd cmd = let _ = CmdName in "Cannot read output of the `\{cmd}` command"
     interpolate $ CmdWritesWrong cmd s = let _ = CmdName in "The `\{cmd}` writes unexpected output: \"\{s}\""
+    interpolate $ CmdExitsWrong cmd ec = let _ = CmdName in "The `\{cmd}` exits with unexpected exit code: \{show ec}"
 
   withPopen2 : HasIO io =>
                (cmd : String) ->
@@ -89,7 +91,11 @@ namespace GettingXZ
       covering
       checkUsable : (cmd : XZCmd) -> {default "" arg : String} -> (stdin : String) -> (stdoutCheck : String -> Bool) -> n ()
       checkUsable cmd stdin stdoutCheck = do
-        withPopen2 "\{cmd} \{arg}" (\_ => throwError $ CmdIsNotUsable cmd) (\_ => pure) $ \subp => do
+        let errHandler = \_ => throwError $ CmdIsNotUsable cmd
+        let ecHandler : forall a. Int -> a -> n a := \case
+          0  => pure
+          ec => const $ throwError $ CmdExitsWrong cmd ec
+        withPopen2 "\{cmd} \{arg}" errHandler ecHandler $ \subp => do
           Right () <- fPutStr subp.input stdin | _ => throwError $ CmdCan'tRead cmd
           closeFile subp.input
           Right stdout <- fRead subp.output    | _ => throwError $ Can'tReadFromCmd cmd
