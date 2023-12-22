@@ -65,6 +65,18 @@ namespace GettingXZ
     interpolate $ Can'tReadFromCmd cmd = let _ = CmdName in "Cannot read output of the `\{cmd}` command"
     interpolate $ CmdWritesWrong cmd s = let _ = CmdName in "The `\{cmd}` writes unexpected output: \"\{s}\""
 
+  withPopen2 : HasIO io =>
+               (cmd : String) ->
+               (error : FileError -> io a) ->
+               (finalise : (exitCode : Int) -> b -> io a) ->
+               (SubProcess -> io b) ->
+               io a
+  withPopen2 cmd error finalise f = do
+    Right subp <- popen2 cmd | Left e => error e
+    res <- f subp
+    exitCode <- popen2Wait subp
+    finalise exitCode res
+
   export
   externalXZ' : HasIO n => MonadError XZUsabilityError n => n XZ
   externalXZ' = assert_total $ do
@@ -77,24 +89,24 @@ namespace GettingXZ
       covering
       checkUsable : (cmd : XZCmd) -> {default "" arg : String} -> (stdin : String) -> (stdoutCheck : String -> Bool) -> n ()
       checkUsable cmd stdin stdoutCheck = do
-        Right subp <- popen2 "\{cmd} \{arg}" | _ => throwError $ CmdIsNotUsable cmd
-        Right () <- fPutStr subp.input stdin | _ => throwError $ CmdCan'tRead cmd
-        closeFile subp.input
-        Right stdout <- fRead subp.output    | _ => throwError $ Can'tReadFromCmd cmd
-        closeFile subp.output
-        let True = stdoutCheck stdout        | _ => throwError $ CmdWritesWrong cmd stdout
-        pure ()
+        withPopen2 "\{cmd} \{arg}" (\_ => throwError $ CmdIsNotUsable cmd) (\_ => pure) $ \subp => do
+          Right () <- fPutStr subp.input stdin | _ => throwError $ CmdCan'tRead cmd
+          closeFile subp.input
+          Right stdout <- fRead subp.output    | _ => throwError $ Can'tReadFromCmd cmd
+          closeFile subp.output
+          let True = stdoutCheck stdout        | _ => throwError $ CmdWritesWrong cmd stdout
+          pure ()
 
       [CallExternXZ] XZ where
 
         xzStrLen ss = do
-          let act = do
-            Right subp <- popen2 "\{Xz} | \{Wc}"              | _ => pure Nothing
-            Right _ <- for @{Compose} ss $ fPutStr subp.input | _ => pure Nothing
-            closeFile subp.input
-            Right n <- assert_total fRead subp.output         | _ => pure Nothing
-            closeFile subp.output
-            pure $ parsePositive n
+          let act : IO $ Maybe Nat = do
+            withPopen2 "\{Xz} | \{Wc}" (const $ pure $ the (Maybe Nat) Nothing) (\_ => pure) $ \subp => do
+              Right _ <- for @{Compose} ss $ fPutStr subp.input | _ => pure Nothing
+              closeFile subp.input
+              Right n <- assert_total fRead subp.output         | _ => pure Nothing
+              closeFile subp.output
+              pure $ parsePositive n
           let _ = Monoid.Additive
           fromMaybe (foldMap length ss) $ unsafePerformIO act
 
