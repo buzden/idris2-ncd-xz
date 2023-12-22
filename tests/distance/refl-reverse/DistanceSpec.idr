@@ -3,7 +3,7 @@ module DistanceSpec
 import Test.Common
 
 reverse_reflexivity : XZ => Property
-reverse_reflexivity = property $ do
+reverse_reflexivity = withTests 1000 $ property $ do
   (s1, s2) <- forAll bytesString2
   let d = ncd s1 s2
   if s1 == s2
