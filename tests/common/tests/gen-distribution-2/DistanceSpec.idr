@@ -3,7 +3,7 @@ module DistanceSpec
 import Test.Common
 
 check_distribution : XZ => Property
-check_distribution = verifiedTermination {min=300} . withTests 50000 . property $ do
+check_distribution = verifiedTermination {min=300} . withConfidence 10000000 . withTests 50000 . property $ do
   (s1, s2) <- forAll bytesString2
   let d = ncd s1 s2
   let class = the Nat $ cast $ d.asDouble * 10
