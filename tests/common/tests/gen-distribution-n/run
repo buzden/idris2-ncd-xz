@@ -1,0 +1,7 @@
+rm -rf build/
+
+flock "$1" pack -q install-deps test.ipkg && \
+HEDGEHOG_COLOR=0 pack -q run test.ipkg \
+  | sed -e 's/·\|▏\|▎\|▍\|▌\|▋\|▊\|▉\|█/·/g' -e 's/passed [0-9]* tests/passed enough tests/' -e 's/[0-9]/ /g'
+
+rm -rf build/

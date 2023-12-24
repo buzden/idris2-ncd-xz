@@ -1,0 +1,7 @@
+package a-test
+
+depends = common-definitions-for-tests
+
+main = DistanceSpec
+
+executable = test
