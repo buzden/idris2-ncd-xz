@@ -62,7 +62,7 @@ bytesStrings : {n : Nat} -> Gen $ Vect (S n) String
 bytesStrings = do
   let changesList = frequency
                       [ (1 , Left <$> bytesString)
-                      , (10, map Right $ list (linear 0 25) $ element [cut, perm, mapCh])
+                      , (100, map Right $ list (linear 0 25) $ element [cut, perm, mapCh])
                       ]
   (base, changes, idx) <- [| (,,) bytesString (vect n changesList) (fin $ constant 0 last) |]
   changed <- for changes $ either pure $ foldlM (flip apply) base
