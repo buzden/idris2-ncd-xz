@@ -1,7 +1,6 @@
 module Test.Common
 
-import Data.Nat
-import Data.Vect
+import public Data.Vect
 
 import public Hedgehog
 
