@@ -7,4 +7,5 @@ main = goldenRunner
   [ "Documentation" `atDir` "docs"
   , "Tests infrastructure" `atDir` "common/tests"
   , "Distance properties" `atDir` "distance"
+  , "File-based operations" `atDir` "files"
   ]

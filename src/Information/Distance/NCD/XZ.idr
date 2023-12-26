@@ -117,11 +117,11 @@ namespace GettingXZ
           fromMaybe (foldMap length ss) $ unsafePerformIO act
 
         xzFileLen fs = do
-          let fss = fs <&> \pth => (pth, escapeArg $ interpolate pth)
+          let fss = fs <&> \pth => (pth, interpolate pth)
           for_ fss $ \(pth, fn) => do
             Right f <- openFile fn Read | Left e => throwError $ FileIOError pth e
             closeFile f
-          let cmd = "\{Cat} \{joinBy " " $ snd <$> fss} | \{Xz} | \{Wc}"
+          let cmd = "\{Cat} \{joinBy " " $ escapeArg . snd <$> fss} | \{Xz} | \{Wc}"
           Right f <- popen cmd Read        | _ => throwError $ Couldn'tCompress fs
           Right n <- assert_total fRead f  | _ => throwError $ Couldn'tReadBytesCount
           0 <- pclose f                    | _ => throwError $ Couldn'tCompress fs
