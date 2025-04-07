@@ -64,7 +64,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install XZ
-        run: apt-get update && apt-get install xz-utils
+        run: apt update && apt install -y xz-utils
       - name: Update `pack-db`
         run: pack update-db
       - name: Switch to the latest compiler, if needed
