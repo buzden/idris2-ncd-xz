@@ -137,32 +137,28 @@ namespace GettingXZ
 ncdValue : (a, b, ab, ba, aa, bb : Nat) -> DoubleBetween 0 1
 ncdValue a b ab ba aa bb = roughlyFit $ cast (min ab ba `minus` min aa bb) / cast (max a b)
 
-export
-XZ => NCD Prelude.id String where
-  ncd sA sB = do
-    let a  = xzStrLen [sA]
-    let b  = xzStrLen [sB]
-    let ab = xzStrLen [sA, sB]
-    let ba = xzStrLen [sB, sA]
-    let aa = xzStrLen [sA, sA]
-    let bb = xzStrLen [sB, sB]
-    ncdValue a b ab ba aa bb
-
-export
+export %hint
 StringNCD : XZ => NCD Prelude.id String
-StringNCD = %search
+StringNCD = S where
+  [S] NCD Prelude.id String where
+    ncd sA sB = do
+      let a  = xzStrLen [sA]
+      let b  = xzStrLen [sB]
+      let ab = xzStrLen [sA, sB]
+      let ba = xzStrLen [sB, sA]
+      let aa = xzStrLen [sA, sA]
+      let bb = xzStrLen [sB, sB]
+      ncdValue a b ab ba aa bb
 
-export
-XZ => HasIO m => MonadError XZFileError m => NCD m AnyFile where
-  ncd sA sB = do
-    let a  = xzFileLen [sA]
-    let b  = xzFileLen [sB]
-    let ab = xzFileLen [sA, sB]
-    let ba = xzFileLen [sB, sA]
-    let aa = xzFileLen [sA, sA]
-    let bb = xzFileLen [sB, sB]
-    [| ncdValue a b ab ba aa bb |]
-
-export
+export %hint
 FileNCD : XZ => HasIO m => MonadError XZFileError m => NCD m AnyFile
-FileNCD = %search
+FileNCD = F where
+  [F] NCD m AnyFile where
+    ncd sA sB = do
+      let a  = xzFileLen [sA]
+      let b  = xzFileLen [sB]
+      let ab = xzFileLen [sA, sB]
+      let ba = xzFileLen [sB, sA]
+      let aa = xzFileLen [sA, sA]
+      let bb = xzFileLen [sB, sB]
+      [| ncdValue a b ab ba aa bb |]
