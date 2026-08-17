@@ -1,0 +1,22 @@
+---
+name: Build and test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "**"
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    - cron: "0 1 * * *"
+
+permissions: read-all
+
+jobs:
+  build-and-test:
+    uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@v1
