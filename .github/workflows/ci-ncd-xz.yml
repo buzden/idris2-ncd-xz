@@ -20,3 +20,7 @@ permissions: read-all
 jobs:
   build-and-test:
     uses: DepTyCheck/idris2-actions/.github/workflows/build-and-test.yml@v1
+    with:
+      pre_test: |
+        apt-get update
+        apt-get install -y xz-utils
