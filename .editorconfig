@@ -29,12 +29,15 @@ indent_size = 4
 indent_style = space
 indent_size = 2
 
-[{*.sh,run,*.bat,ncd-xz,.patch-*}]
+[{*.sh,run,*.bat,*-xz,.patch-*}]
 indent_style = space
 indent_size = 2
 shell_variant = posix
 switch_case_indent = true
 space_redirects = true
+
+[panhard-xz]
+shell_variant = bash
 
 [{Makefile,*.mk}]
 indent_style = tab
