@@ -46,47 +46,32 @@ for n in "${individual_lens[@]}"; do
 done
 unset individual_lens
 
-declare -a group_lens
+all_lens="$(compSize "${FILES[@]}")"
+
+relative_lens_sum=0
 for ((oi = 0; oi < FILES_COUNT; ++oi)); do
 
-  # compute for direct
-  group_lens+=("$(compSize "${FILES[@]}")")
+  files_but_one=()
+  if ((oi >= 1)); then
+    files_but_one+=("${FILES[@]::$oi}")
+  fi
+  if ((oi + 1 < FILES_COUNT)); then
+    files_but_one+=("${FILES[@]:(($oi+1))}")
+  fi
 
-  # reverse FILES
-  for ((i = 0, j = FILES_COUNT - 1; i < j; ++i, --j)); do
-    temp="${FILES[i]}"
-    FILES[i]="${FILES[j]}"
-    FILES[j]="$temp"
-  done
-
-  # compute for reverse
-  group_lens+=("$(compSize "${FILES[@]}")")
-
-  # reverse FILES back
-  for ((i = 0, j = FILES_COUNT - 1; i < j; ++i, --j)); do
-    temp="${FILES[i]}"
-    FILES[i]="${FILES[j]}"
-    FILES[j]="$temp"
-  done
-
-  # shift FILES
-  FILES=("${FILES[@]:1}" "${FILES[0]}")
-
+  all_but_one_lens="$(compSize "${files_but_one[@]}")"
+  relative_lens="$((all_lens - all_but_one_lens))"
+  relative_lens_sum="$((relative_lens_sum + relative_lens))"
 done
-group_min=${group_lens[0]}
-for n in "${group_lens[@]}"; do
-  ((n < group_min)) && group_min=$n
-done
-unset group_lens
 
-#{
-#echo "individual_min: $individual_min"
-#echo "individual_max: $individual_max"
-#echo "group_min: $group_min"
-#echo
-#} >&2
+{
+echo "individual_min: $individual_min"
+echo "individual_max: $individual_max"
+echo "relative_lens_sum: $relative_lens_sum"
+echo
+} >&2
 
 echo "
 scale=10
-($group_min - $individual_min) / $individual_max
+$relative_lens_sum / ($FILES_COUNT * $individual_max)
 " | bc
