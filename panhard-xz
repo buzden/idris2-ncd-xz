@@ -34,29 +34,23 @@ for file in "${FILES[@]}"; do
   fileExists "$file" || exit
 done
 
-declare -a individual_lens
+individual_lens_sum=0
 for file in "${FILES[@]}"; do
-  individual_lens+=("$(compSize "$file")")
+  individual_len="$(compSize "$file")"
+  individual_lens_sum="$((individual_lens_sum + individual_len))"
 done
-individual_min=${individual_lens[0]}
-individual_max=${individual_lens[0]}
-for n in "${individual_lens[@]}"; do
-  ((n < individual_min)) && individual_min=$n
-  ((n > individual_max)) && individual_max=$n
-done
-unset individual_lens
 
 all_lens="$(compSize "${FILES[@]}")"
 
 relative_lens_sum=0
-for ((oi = 0; oi < FILES_COUNT; ++oi)); do
+for ((oi = 0; oi < FILES_COUNT && FILES_COUNT > 1; ++oi)); do
 
   files_but_one=()
   if ((oi >= 1)); then
     files_but_one+=("${FILES[@]::$oi}")
   fi
   if ((oi + 1 < FILES_COUNT)); then
-    files_but_one+=("${FILES[@]:(($oi+1))}")
+    files_but_one+=("${FILES[@]:(($oi + 1))}")
   fi
 
   all_but_one_lens="$(compSize "${files_but_one[@]}")"
@@ -64,14 +58,7 @@ for ((oi = 0; oi < FILES_COUNT; ++oi)); do
   relative_lens_sum="$((relative_lens_sum + relative_lens))"
 done
 
-{
-echo "individual_min: $individual_min"
-echo "individual_max: $individual_max"
-echo "relative_lens_sum: $relative_lens_sum"
-echo
-} >&2
-
 echo "
 scale=10
-$relative_lens_sum / ($FILES_COUNT * $individual_max)
+$relative_lens_sum / $individual_lens_sum
 " | bc
