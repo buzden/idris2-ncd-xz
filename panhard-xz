@@ -22,21 +22,26 @@ compSize() {
   cat "$@" | xz --format=raw --compress --stdout --no-warn --quiet | wc -c
 }
 
-FILES_COUNT="$#"
-
 if [ "$FILES_COUNT" == "0" ] || [ "$FILES_COUNT" == "1" ] && [ "$1" == "--help" ]; then
   usage
 fi
+if [ "$1" == "--verbose" ]; then
+  VERBOSE=1
+  shift
+fi
 
+FILES_COUNT="$#"
 FILES=("$@")
 
 for file in "${FILES[@]}"; do
   fileExists "$file" || exit
 done
 
+declare -a individual_lens
 individual_lens_sum=0
 for file in "${FILES[@]}"; do
   individual_len="$(compSize "$file")"
+  individual_lens+=("$individual_len")
   individual_lens_sum="$((individual_lens_sum + individual_len))"
 done
 
@@ -54,11 +59,13 @@ for ((oi = 0; oi < FILES_COUNT && FILES_COUNT > 1; ++oi)); do
   fi
 
   all_but_one_lens="$(compSize "${files_but_one[@]}")"
-  relative_lens="$((all_lens - all_but_one_lens))"
-  relative_lens_sum="$((relative_lens_sum + relative_lens))"
+  relative_len="$((all_lens - all_but_one_lens))"
+  relative_lens_sum="$((relative_lens_sum + relative_len))"
+
+  if [ -n "$VERBOSE" ]; then
+    relative_len_normalised="$(echo "scale=10; $relative_len / ${individual_lens[$oi]}" | bc)"
+    echo "$relative_len_normalised ${FILES[$oi]}" >&2
+  fi
 done
 
-echo "
-scale=10
-$relative_lens_sum / $individual_lens_sum
-" | bc
+echo "scale=10; $relative_lens_sum / $individual_lens_sum" | bc
