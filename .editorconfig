@@ -46,7 +46,7 @@ indent_style = tab
 trim_trailing_whitespace = false
 max_line_length = off
 
-[{x,y,z}]
+[{x,y,z,u}]
 charset = unset
 end_of_line = unset
 insert_final_newline = false
