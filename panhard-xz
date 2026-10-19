@@ -6,23 +6,23 @@ if ! xz --version > /dev/null 2> /dev/null; then
 fi
 
 usage() {
-  echo "Usage: $0 <files> ..." >&2
+  echo "Usage: $0 <files-or-dirs> ..." >&2
   exit 3
 }
 
-fileExists() {
-  if [ ! -r "$1" ]; then
-    echo "Argument \"$1\" must be a readable file" >&2
+fileOrDirExists() {
+  if [ ! -r "$1" ] || [ ! -f "$1" ] && [ ! -d "$1" ]; then
+    echo "Argument \"$1\" must be a readable file or directory" >&2
     exit 4
   fi
 }
 
 # Prints a count of bytes of a compressed files
 compSize() {
-  cat "$@" | xz --format=raw --compress --stdout --no-warn --quiet | wc -c
+  { for f in "$@"; do cat "$f"; done; } | xz --format=raw --compress --stdout --no-warn --quiet | wc -c
 }
 
-if [ "$FILES_COUNT" == "0" ] || [ "$FILES_COUNT" == "1" ] && [ "$1" == "--help" ]; then
+if [ "$#" == "0" ] || [ "$#" == "1" ] && [ "$1" == "--help" ]; then
   usage
 fi
 if [ "$1" == "--verbose" ]; then
@@ -30,32 +30,39 @@ if [ "$1" == "--verbose" ]; then
   shift
 fi
 
-FILES_COUNT="$#"
-FILES=("$@")
+inputs=("$@")
 
-for file in "${FILES[@]}"; do
-  fileExists "$file" || exit
+for input in "${inputs[@]}"; do
+  fileOrDirExists "$input" || exit
 done
+
+declare -a files
+for input in "${inputs[@]}"; do
+  readarray -t curr < <(find "$input" -type f)
+  files+=("${curr[@]}")
+done
+
+files_count="${#files[@]}"
 
 declare -a individual_lens
 individual_lens_sum=0
-for file in "${FILES[@]}"; do
+for file in "${files[@]}"; do
   individual_len="$(compSize "$file")"
   individual_lens+=("$individual_len")
   individual_lens_sum="$((individual_lens_sum + individual_len))"
 done
 
-all_lens="$(compSize "${FILES[@]}")"
+all_lens="$(compSize "${files[@]}")"
 
 relative_lens_sum=0
-for ((oi = 0; oi < FILES_COUNT && FILES_COUNT > 1; ++oi)); do
+for ((oi = 0; oi < files_count && files_count > 1; ++oi)); do
 
   files_but_one=()
   if ((oi >= 1)); then
-    files_but_one+=("${FILES[@]::$oi}")
+    files_but_one+=("${files[@]::$oi}")
   fi
-  if ((oi + 1 < FILES_COUNT)); then
-    files_but_one+=("${FILES[@]:(($oi + 1))}")
+  if ((oi + 1 < files_count)); then
+    files_but_one+=("${files[@]:(($oi + 1))}")
   fi
 
   all_but_one_lens="$(compSize "${files_but_one[@]}")"
@@ -64,7 +71,7 @@ for ((oi = 0; oi < FILES_COUNT && FILES_COUNT > 1; ++oi)); do
 
   if [ -n "$VERBOSE" ]; then
     relative_len_normalised="$(echo "scale=10; $relative_len / ${individual_lens[$oi]}" | bc)"
-    echo "$relative_len_normalised ${FILES[$oi]}" >&2
+    echo "$relative_len_normalised ${files[$oi]}" >&2
   fi
 done
 
