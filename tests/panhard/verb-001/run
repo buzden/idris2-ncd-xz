@@ -1,0 +1,1 @@
+../../../panhard-xz --verbose x y z run ../../tests.ipkg 2>/dev/null

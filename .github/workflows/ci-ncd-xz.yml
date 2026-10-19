@@ -23,4 +23,4 @@ jobs:
     with:
       pre_test: |
         apt-get update
-        apt-get install -y xz-utils
+        apt-get install -y xz-utils bc
