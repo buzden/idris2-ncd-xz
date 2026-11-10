@@ -70,7 +70,7 @@ for ((oi = 0; oi < files_count && files_count > 1; ++oi)); do
   relative_lens_sum="$((relative_lens_sum + relative_len))"
 
   if [ -n "$VERBOSE" ]; then
-    relative_len_normalised="$(echo "scale=10; $relative_len / ${individual_lens[$oi]}" | bc)"
+    relative_len_normalised="$(echo "scale=10; 1 - ($all_but_one_lens / $all_lens)" | bc)"
     echo "$relative_len_normalised ${files[$oi]}" >&2
   fi
 done
