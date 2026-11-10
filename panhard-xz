@@ -75,4 +75,11 @@ for ((oi = 0; oi < files_count && files_count > 1; ++oi)); do
   fi
 done
 
+if [ -n "$VERBOSE" ]; then
+  {
+    printf "residual="
+    echo "scale=10; 1 - ($all_lens / $individual_lens_sum)" | bc
+  } >&2
+fi
+
 echo "scale=10; $relative_lens_sum / $individual_lens_sum" | bc
