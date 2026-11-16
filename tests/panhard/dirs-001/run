@@ -1,1 +1,1 @@
-../../../panhard-xz x y z run d ../../tests.ipkg 2>&1
+../../../panhard-xz x y z some-text d ../../tests.ipkg 2>&1

@@ -1,0 +1,1 @@
+../../../panhard-xz x y z run d ../../tests.ipkg 2>&1
